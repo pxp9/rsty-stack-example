@@ -2,6 +2,8 @@ use crate::{
     state::{TaskAction, TaskState},
     todo_api,
 };
+
+use web_sys::{console::log, js_sys::Array, wasm_bindgen::JsValue};
 use yew::UseReducerHandle;
 
 pub struct TaskController {
@@ -16,8 +18,16 @@ impl TaskController {
     pub fn init_tasks(&self) {
         let tasks = self.state.clone();
         wasm_bindgen_futures::spawn_local(async move {
-            let fetched_tasks = todo_api::fetch_tasks().await.unwrap();
-            tasks.dispatch(TaskAction::Set(fetched_tasks))
+            let result = todo_api::fetch_tasks().await;
+            if let Err(err) = result {
+                let string = format!("{:?}", err.to_string());
+                let js_val = JsValue::from_str(&string);
+                let arr = Array::from(&js_val);
+                log(&arr);
+            } else {
+                let fetched_tasks = result.unwrap();
+                tasks.dispatch(TaskAction::Set(fetched_tasks))
+            }
         });
     }
 
