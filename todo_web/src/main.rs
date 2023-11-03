@@ -10,6 +10,7 @@ mod todo_api;
 use components::*;
 use controllers::*;
 use state::*;
+use yew::Html;
 
 #[function_component(App)]
 fn app() -> Html {
@@ -18,13 +19,7 @@ fn app() -> Html {
 
     {
         let tasks_controller = tasks_controller.clone();
-        use_effect_with_deps(
-            move |_| {
-                tasks_controller.init_tasks();
-                || () // return empty destructor closure
-            },
-            (),
-        ); // only call on first render
+        use_effect_with((), move |_| tasks_controller.init_tasks()); // only call on first render
     }
 
     let on_create_task = {
@@ -64,5 +59,5 @@ fn app() -> Html {
 }
 
 fn main() {
-    yew::start_app::<App>();
+    yew::Renderer::<App>::new().render();
 }
